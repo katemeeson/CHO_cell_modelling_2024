@@ -1,4 +1,5 @@
 # CHO_cell_modelling_2024 (repository developed October 2024)
+#### Main Authors of this repository: Dr Kate Meeson and Dr Joanne Watson
 ## Flux sampling workflow using the Coordinate hit-and-run with rounding algorithm (PMID: 28158334; Haraldsdóttir et al, 2017)
 ### The aim of this project is to explore the metabolism of CHO cells and optimise their IgG production
 ### This flux sampling workflow uses Mann-Whitney U test to identify the reactions significantly associated with the 95th percentile of high IgG-producing sampling solutions
