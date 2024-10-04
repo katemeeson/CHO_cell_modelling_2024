@@ -8,3 +8,4 @@
 # File descriptions:
 #### 1. FluxSampling_analysis_and_visualisation.ipnyb contains workflow for the integration of transcriptomics data into the iCHO2441 model. Followed by flux sampling and FBA, subsystem overenrichment analysis and PCA visualisation of high IgG-producing sampling solutions. Some statistical analysis of results.
 #### 2. DeSeq2_analysis.R contains all code required for PCA visualisation, DeSeq2 analysis, heatmap and functional enrichment analysis in Figure 2.
+#### 3. FluxSampling_highIgG_reactions_subsystemsVis.R contains code for subsystem enrichment analysis presented in Figure 5.
