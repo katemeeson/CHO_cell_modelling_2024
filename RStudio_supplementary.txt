@@ -1,0 +1,25 @@
+#This is a resource similar to a Python requirements.txt file, showing packages/libraries used for analysis in RStudio.
+#If there is a better way to format this to facilitate reproducibility (figs and data) in RStudio, please let me know! kate.meeson@manchester.ac.uk
+
+R==4.3.2
+# Source: https://www.stats.bris.ac.uk/R/
+Bioconductor==3.18
+# Source: https://bioconductor.org/install/
+tidyverse==2.0.0
+# Source: Comprehensive R Archive Network (CRAN)
+enrichR==3.2
+# Source: CRAN
+DESeq2==1.42.0
+# Source: Bioconductor
+plotly==4.10.4
+# Source: Bioconductor
+biomaRt==2.58.0
+# Source: Bioconductor
+UniProt.ws==2.42.0
+# Source: Bioconductor
+patchwork==1.2.0
+# Source: CRAN
+RcisTarget==1.19.2
+# Source: Bioconductor
+data.table==1.14.8
+#Source: Bioconductor
