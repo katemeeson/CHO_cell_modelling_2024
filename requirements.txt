@@ -1,0 +1,37 @@
+Python==3.10.12
+VSCode==1.86.0
+cobra==0.26.2
+# Requires: appdirs,depinfo,diskcache,future,httpx,importlib-resources,numpy,optlang,pandas,pydantic,python-libsbml,rich,ruamel.yaml,swiglpk
+# Required-by: n/a
+matplotlib==3.7.1
+# Requires: contourpy, cycler, fonttools, kiwisolver, numpy, packaging, pillow, pyparsing, python-dateutil
+# Required-by: pyod, seaborn, UpSetPlot
+numpy==1.23.5
+# Requires: n/a
+# Required-by: Bottleneck, cobra, contourpy, matplotlib, mkl-fft, mkl-random, numba, numexpr, outlier-utils, package-outlier, pandas, patsy, pyod, scikit-learn, scipy, seaborn, statsmodels
+outlier-utils==0.0.5
+# Requires: numpy, scipy
+# Required-by: n/a
+pandas==1.5.3
+# Requires: numpy, python-dateutil, pytz, tzdata
+# Required-by: cobra, package-outlier, seaborn, statsmodels, UpSetPlot
+plotly==4.10.4
+# Requires: packaging, tenacity
+# Required-by: n/a
+seaborn==0.12.2
+# Requires: matplotlib, numpy, pandas
+# Required-by: n/a
+scikit-learn==1.3.1
+# Requires: joblib, numpy, scipy, threadpoolctl
+# Required-by: package-outlier, pyod
+scipy==1.11.1
+# Requires: numpy
+# Required-by: outlier-utils, package-outlier, pyod, scikit-learn, statsmodels
+statsmodels==0.14.0
+# Requires: numpy, packaging, pandas, patsy, scipy
+# Required-by: n/a
+upsetplot==0.8.0
+# Requires: matplotlib, pandas
+# Required-by: n/a
+
+#import map_transcriptome_data from function_mapping_transcriptome_JW.py file
