@@ -1,22 +1,23 @@
 library(tidyverse)
 library(patchwork)
-phases = c("Early exponential", "Late exponential", "Stationary/death")
-phases_flt = c("Early exponential", "Late exponential", "Stationary/death")
+phases = c("[4]", "[5]", "[6, 7, 8]", "[11, 12, 14]")
+phases_flt = c("[4]", "[6, 7, 8]", "[11, 12, 14]")
+phase_names = c('Early exponential','Late exponential','Stationary/death')
 
 # Toggle line 7 and 8 to plot absolute number and proportion :)
-
-dat <- read_csv("fluxSampling_subsystems_for_ggplot2_km.csv") %>% 
+#dat <- read_csv("fluxSampling_subsystems_for_ggplot2.csv") %>% 
+dat <- read_csv("fluxSampling_subsystems_proportions_for_ggplot2.csv") %>% 
   mutate(down = -down) %>% 
   pivot_longer(c(down, up), names_to = "direction") %>% 
   filter(abs(value) > 1) %>% 
+  filter(phase != "[5]") %>%
   pivot_wider(names_from = "phase", values_fill = NA) %>% 
-  pivot_longer(any_of(phases), names_to = "phase") %>%
+  #interchange 'phase_names'/'phases' to label with name of phase or time points
+  pivot_longer(any_of(phase_names), names_to = "phase") %>%
   pivot_wider(names_from = direction, values_fill = NA) %>% 
   arrange(sumValues) %>% 
   mutate(order = 1:nrow(.),
-         phase = factor(phase, levels = phases, ordered = T))
-
-#dat <- read_csv("fluxSampling_subsystems_proportions_for_ggplot2.csv") %>% 
+         phase = factor(phase, levels = phase_names, ordered = T))
 
 g_up <- ggplot(dat, aes(x = up, y = reorder(ss, order), color = phase)) +
   geom_segment(aes(x=up, xend=0, y=reorder(ss, order), 
@@ -37,8 +38,18 @@ g_up <- ggplot(dat, aes(x = up, y = reorder(ss, order), color = phase)) +
   ) +
  # scale_y_discrete(position = "right") +
  # geom_vline(xintercept = 0, color = "white", linewidth = 4) +
-  scale_color_manual(values=c("red", "green", "violet"))
-  
+  scale_color_brewer(palette = "Pastel2", name = "") +
+  annotate("segment", 
+           xend = max(c(abs(dat$down), abs(dat$up)), na.rm = T)*0.75, 
+           x = max(c(abs(dat$down), abs(dat$up)), na.rm = T)*0.25,
+           y = 2, yend = 2,
+           colour = "darkgrey", alpha=0.6, size= 0.5, 
+           arrow=arrow(length=unit(0.2,"cm"), type = "closed")) +
+  geom_text(x= max(c(abs(dat$down), abs(dat$up)), na.rm = T)*0.45,
+            y = 2,
+            label = "Up in high\nIgG solutions",
+            size= 3,
+            color = "darkgrey")
 g_down <- ggplot(dat, aes(x = down, y = reorder(ss, order), color = phase)) +
   geom_segment(aes(x=down, xend=0, y=reorder(ss, order), 
                    yend=reorder(ss, order)),
@@ -58,10 +69,20 @@ g_down <- ggplot(dat, aes(x = down, y = reorder(ss, order), color = phase)) +
   ) +
   scale_y_discrete(position = "right") +
  # geom_vline(xintercept = 0, color = "white", linewidth = 4) +
-  scale_color_manual(values=c("red", "green", "violet"))
-  
+  scale_color_brewer(palette = "Pastel2", name = "") +
+  annotate("segment", 
+           xend = -max(c(abs(dat$down), abs(dat$up)), na.rm = T)*0.75, 
+           x = -max(c(abs(dat$down), abs(dat$up)), na.rm = T)*0.25,
+           y = 2, yend = 2,
+           colour = "darkgrey", alpha=0.6, size= 0.5, 
+           arrow=arrow(length=unit(0.2,"cm"), type = "closed")) +
+  geom_text(x= -max(c(abs(dat$down), abs(dat$up)), na.rm = T)*0.45,
+            y = 2,
+            label = "Down in high\nIgG solutions",
+            size= 3,
+            color = "darkgrey")
 g_down + g_up + plot_layout(guides = "collect")
 
-#ggsave("results/figs/010824_fluxSampling_subsystems_nReactions.tiff")
+#ggsave("results/figs/fluxSampling_subsystems_nReactions.tiff")
 
 

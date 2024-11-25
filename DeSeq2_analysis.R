@@ -1,11 +1,11 @@
-
 library(tidyverse)
 library(readxl)
 library(biomaRt)
 library(DESeq2)
+library(geneEnrichment)
 
 modelgenes <- read_csv("../1_CriGr_model_ref_Data/genes_mapped.csv")
-rnaseq <- read_csv("data/reads_concatenated.csv") %>% 
+rnaseq <- read_csv("data/reads_concatenated_rmvD5.csv") %>% 
   filter(!if_all(matches("Reads"), ~ .x < 10))
 
 ### SET UP BIOMART
@@ -58,16 +58,15 @@ pca$group <- factor(as.numeric(as.character(pca$group)))
 pca$rep <- ifelse(grepl("B12", pca$name), 1,
                   ifelse(grepl("B13", pca$name), 2,3))
 
-palette = colorRampPalette(c("red", "orange", "gold", "darkgreen", "darkblue","violet"))(15)
+palette = colorRampPalette(c("red", "gold", "darkgreen", "darkblue","violet"))(15)
 ggplot(pca, aes(x = PC1, y = PC2, color = group, shape = as.factor(rep))) +
   geom_point(size = 4) +
-  xlab("PC1 61%") +
-  ylab("PC2 18%") +
+  xlab("PC1 61.9%") +
+  ylab("PC2 20.0%") +
   scale_color_manual(name = "Day",
-                   #  values = colorRampPalette(c("red", "orange", "gold", "darkgreen", "darkblue","violet"))(8)
+                   #  values = colorRampPalette(c("red", "gold", "darkgreen", "darkblue","violet"))(7)
                      values = c(
                        palette[5],
-                       palette[6],
                        palette[7],
                        palette[8],
                        palette[9],
@@ -80,7 +79,7 @@ plotDispEsts(dds)
 
 # Set up contrasts for stats tests
 # Concurrent days were contrasted 
-# (i.e. day 4 - day 5, day 5 - day 6, etc.)
+# (i.e. day 4 - day 6, day 6 - day 7, etc.)
 timeComp1 <- unique(sampleData$time)[1:length(unique(sampleData$time))-1]
 timeComp2 <- unique(sampleData$time)[2:length(unique(sampleData$time))]
 # Perform tests. All parameters default.
@@ -101,7 +100,7 @@ sig_genes <- res %>%
   group_by(gene) %>% 
   filter(padj < 0.05 & !is.na(padj))
 length(unique(sig_genes$gene))
-table(modelgenes$Ensembl %in% sig_genes$gene) # 1160 model genes differentially expressed over time
+table(modelgenes$Ensembl %in% sig_genes$gene) # n model genes differentially expressed over time
 
 # Extract normalized counts from DeSeq2 object.
 ntd <- counts(dds, normalized = TRUE)
@@ -119,7 +118,7 @@ ntd %>%
   left_join(sig_genes_forExport, by = c("Ensembl" = "gene")) %>%  
   left_join(bm_dat_cho, by = "Ensembl", multiple = "all") %>% 
   mutate(isSig = ifelse(Ensembl %in% sig_genes$gene, "+", "")) %>% 
-  write_csv("results/data/DeSeq2_counts_wDE_genes.csv")
+  write_csv("results/data/DeSeq2_counts_wDE_genes_251124_rmvD5.csv")
 
 # Calculate Z-score for heatmap visualisation
 z_long <-  ntd %>% 
@@ -136,15 +135,17 @@ z_long <-  ntd %>%
   mutate(z = (m - mean(m)) / sd(m))
 
 # Data are Z normalised and ordered along the y axis by the time point of peak expression.
-z_g <- z_long %>% 
+z_long %>% 
   group_by(gene) %>% 
   filter(sum(is.na(z)) < n()) %>% 
   mutate(max_tp = factor(day[z == max(z)],
-                         levels = c(4,5,6,7,8,11,12, 14),
+                         levels = c(4,6,7,8,11,12, 14),
                          ordered = T)) %>% 
   ungroup() %>% 
   arrange(max_tp) %>% 
-  mutate(gene =factor(gene, levels = unique(gene))) %>% 
+  mutate(gene =factor(gene, levels = unique(gene))) -> z_long2
+
+z_long2 %>% 
   ggplot(aes(x = as.factor(day),
              y = gene,
              fill = z)) +
@@ -153,7 +154,7 @@ z_g <- z_long %>%
   theme(axis.text.y = element_blank(),
         axis.ticks = element_blank()) +
   xlab("Day")  +
-  ggtitle("DE genes")
+  ggtitle("DE genes") -> z_g
 z_g
 
 z_g_model <- z_g$data %>% 
@@ -194,7 +195,7 @@ mm_ensembl <- getBM(attributes = c(
   "mmusculus_homolog_ensembl_gene",
   "ensembl_gene_id"),
   filters = "ensembl_gene_id",
-  values = z_long$Ensembl, 
+  values = z_long$gene, 
   mart = ensembl_cho)  
 mm_symbols <- getBM(attributes = c(
   #"uniprot_gn_symbol",
@@ -205,12 +206,11 @@ mm_symbols <- getBM(attributes = c(
   mart = ensembl_mm)  
 
 enrich <-  left_join(mm_ensembl, mm_symbols, by = c("mmusculus_homolog_ensembl_gene" = "ensembl_gene_id"), multiple= "all") %>% 
-  left_join(z_long, by = c("ensembl_gene_id" = "Ensembl")) %>% 
+  left_join(z_long2, by = c("ensembl_gene_id" = "gene")) %>%
   filter(if_all(c(max_tp), ~ !is.na(.x))) %>% 
   #  mutate(timePhase = max_tp) %>% 
   mutate(timePhase = ifelse(max_tp ==4, "4",
-                            ifelse(max_tp == 5, "5",
-                                   ifelse(max_tp %in% c(6,7,8), "6,7,8", "11,12,14")))) %>% 
+                            ifelse(max_tp %in% c(6,7,8), "6,7,8", "11,12,14"))) %>% 
   group_by(timePhase) %>% 
   group_split() %>% 
   map(~ calculateEnrichment(unique(.x$mgi_symbol),
@@ -239,14 +239,13 @@ enrich_g <- enrich %>%
   guides(color ="none") +
   scale_color_manual(values = c(
     "4"="red",
-    "5"="darkorange",
     "6,7,8"="darkgreen", 
     "11,12,14" = "darkblue"
   )) +
-  scale_x_discrete(limits = c("4", "5", "6,7,8", "11,12,14"),
-                   breaks = c("4", "5", "6,7,8", "11,12,14")) +
-  # scale_x_discrete(breaks = factor(c(4,5,6,7,8,11,12,14)),
-  #                  limits= factor(c(4,5,6,7,8,11,12,14)))
+  scale_x_discrete(limits = c("4", "6,7,8", "11,12,14"),
+                   breaks = c("4", "6,7,8", "11,12,14")) +
+  # scale_x_discrete(breaks = factor(c(4,6,7,8,11,12,14)),
+  #                  limits= factor(c(4,6,7,8,11,12,14)))
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   coord_flip()
 
@@ -262,5 +261,4 @@ enrich_flt <- enrich %>%
   dplyr::select(Term, timePhase, Genes) %>% 
   group_by(Term) %>% 
   mutate(isUnique = ifelse(n() == 1, "+","") ) %>% 
-  write_csv("results/data/timePhase_enrichment.csv")
-
+  write_csv("results/data/timePhase_enrichment_251124_rmvD5.csv")
