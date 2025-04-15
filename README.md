@@ -1,4 +1,6 @@
 # **CHO_cell_modelling_2024** (repository developed October 2024)
+### Link to publication in Biotechnology and Bioengineering: https://doi.org/10.1002/bit.28982
+![image](https://github.com/user-attachments/assets/e7501eb9-ebda-43a7-8748-84dc5cfa900d)
 #### **Main Authors** of this repository: Dr Kate Meeson and Dr Joanne Watson
 #### **Corresponding Author:** Kate Meeson: kate.meeson@manchester.ac.uk
 ### **Aim of project:** To explore the metabolism of CHO cells and optimise their IgG production.
